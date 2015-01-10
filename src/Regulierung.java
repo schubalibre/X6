@@ -3,10 +3,11 @@ import nodenet.NodeBehavior;
 import nodenet.OutputChannelVector;
 
 
-public class Verstopfung implements NodeBehavior {
+public class Regulierung implements NodeBehavior {
 
 	@Override
-	public void transmitPacket(InputChannelVector inputChannels, OutputChannelVector outputChannels) {
+	public void transmitPacket(InputChannelVector inputChannels,
+			OutputChannelVector outputChannels) {
 		// TODO Auto-generated method stub
 
 	}
