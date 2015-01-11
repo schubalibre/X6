@@ -22,7 +22,7 @@ public class Regulierung implements NodeBehavior {
 		// Wenn keine Channel da sing
 		if(inputSize == 0 || outputSize == 0)return;
 
-		// Zeiger meines Inputchannels - da modulo ist es egal ob er bei 0 anfängt
+		// Zeiger meines Inputchannels - er wird einmal gesetzt, zufällig und dann beibehalten
 		if(next < 0) next = (int) (Math.random() * inputSize);
 		
 		try{
@@ -32,7 +32,7 @@ public class Regulierung implements NodeBehavior {
 		catch(ChannelDisabledException exc2) { return; }
 		
 		count++;
-		
+		// gibt das Paket aller drei Zyklen weiter.
 		if(count % 3 == 0){
 			// Zeiger meines Outputchannels - da modulo ist es egal ob er bei 0 anfängt
 			last = (last+1) % outputSize;
