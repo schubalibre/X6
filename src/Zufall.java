@@ -25,17 +25,20 @@ public class Zufall implements NodeBehavior {
 		// Zeiger meines Inputchannels per Zufall berechnet
 		next = (int) (Math.random() * inputSize);
 		
-		try{
-			this.obj =  inputChannels.elementAt(next).readObject(); 
+		if(obj == null){
+			try{
+				this.obj =  inputChannels.elementAt(next).readObject(); 
+			}
+			catch(ChannelEmptyException exc) { return; } 
+			catch(ChannelDisabledException exc2) { return; }
 		}
-		catch(ChannelEmptyException exc) { return; } 
-		catch(ChannelDisabledException exc2) { return; }
 
 		// Zeiger meines Outputchannels per Zufall berechnet
 		last = (int) (Math.random() * outputSize);
 		
 		try{
-			outputChannels.elementAt(last).writeObject(this.obj); 
+			outputChannels.elementAt(last).writeObject(obj); 
+			obj = null;
 		}
 		catch(ChannelFullException exc) { return; } 
 		catch(ChannelDisabledException exc2) { return; }

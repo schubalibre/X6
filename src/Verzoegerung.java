@@ -26,12 +26,13 @@ public class Verzoegerung implements NodeBehavior {
 		// Zeiger meines Inputchannels - da modulo ist es egal ob er bei 0 anfängt
 		next = (next+1) % inputSize;
 		
-		try{
-			this.obj =  inputChannels.elementAt(next).readObject(); 
+		if(obj == null){
+			try{
+				obj =  inputChannels.elementAt(next).readObject(); 
+			}
+			catch(ChannelEmptyException exc) { return; } 
+			catch(ChannelDisabledException exc2) { return; }
 		}
-		catch(ChannelEmptyException exc) { return; } 
-		catch(ChannelDisabledException exc2) { return; }
-
 		
 		try {
 			Thread.sleep(milsec);
@@ -44,7 +45,8 @@ public class Verzoegerung implements NodeBehavior {
 		last = (last+1) % outputSize;
 		
 		try{
-			outputChannels.elementAt(last).writeObject(this.obj); 
+			outputChannels.elementAt(last).writeObject(obj);
+			obj = null;
 		}
 		catch(ChannelFullException exc) { return; } 
 		catch(ChannelDisabledException exc2) { return; }
