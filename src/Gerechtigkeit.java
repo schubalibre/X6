@@ -29,20 +29,21 @@ public class Gerechtigkeit implements NodeBehavior {
 			try{
 				obj =  inputChannels.elementAt(next).readObject();
 			}
-			catch(ChannelEmptyException exc) {return;} 
-			catch(ChannelDisabledException exc2) {return;}
+			catch(ChannelEmptyException exc) { System.out.println(exc.toString());return;} 
+			catch(ChannelDisabledException exc2) { System.out.println(exc2.toString());return;}
 		}
 
 		// Zeiger meines Outputchannels - da modulo ist es egal ob er bei 0 anfängt
 		last = (last+1) % outputSize;
 		
+		// hier muss mit keinem if kontroliert werden, da wenn 
 		try{
 			outputChannels.elementAt(last).writeObject(obj); 
 			//wenn erfolgreich abgeschickt dann setzen wir obj wieder null
 			obj = null;
 		}
-		catch(ChannelFullException exc1) {return;} 
-		catch(ChannelDisabledException exc2) {return;}
+		catch(ChannelFullException exc1) { System.out.println(exc1.toString());return;} 
+		catch(ChannelDisabledException exc2) { System.out.println(exc2.toString());return;}
 			
 	}
 
