@@ -36,7 +36,7 @@ public class Gerechtigkeit implements NodeBehavior {
 		// Zeiger meines Outputchannels - da modulo ist es egal ob er bei 0 anfängt
 		last = (last+1) % outputSize;
 		
-		// hier muss mit keinem if kontroliert werden, da wenn 
+		// hier muss mit keinem if kontrolliert werden, da wenn GeneradeNode nichts sendet oder deaktiviert ist die Exception greift und es nicht zum senden kommt
 		try{
 			outputChannels.elementAt(last).writeObject(obj); 
 			//wenn erfolgreich abgeschickt dann setzen wir obj wieder null
