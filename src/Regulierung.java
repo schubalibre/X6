@@ -8,47 +8,77 @@ import nodenet.OutputChannelVector;
 
 public class Regulierung implements NodeBehavior {
 
-	private Object obj = null;
-	// die Zeiger der Input Channel's und der Output Channel's
-	private	int next = -1, last = 0, count = 0;
-
+	private Object paket = null;
+	private int aktuellePositionEingang = 0, aktuellePositionAusgang = 0, count = 0;
 	@Override
 	public void transmitPacket(InputChannelVector inputChannels, OutputChannelVector outputChannels) {
-		
-		// die Channelanzahl (Bei jedem Durchlauf aktualisiert )
-		int inputSize = inputChannels.size();
+
+		int inputSize = inputChannels.size(); // gibt uns die Anzahl der Channels insgesamt wieder
 		int outputSize = outputChannels.size();
-
-		// Wenn keine Channel da sing
-		if(inputSize == 0 || outputSize == 0)return;
-
-		// Zeiger meines Inputchannels - er wird einmal gesetzt, zufällig und dann beibehalten
-		if(next <= 0) next = (int) (Math.random() * inputSize);
 		
-		if(obj == null){
-			try{
-				obj =  inputChannels.elementAt(next).readObject(); 
-			}
-			catch(ChannelEmptyException exc) { return; } 
-			catch(ChannelDisabledException exc2) { return; }
-		}
+		if(inputSize == 0 || outputSize == 0) return;// kontrolliert wieviele Kanäle im inputChannel sind 
 		
-		// gibt das Paket aller drei Zyklen weiter.
-		if(count % 3 == 0){
-			System.out.println(count);
-			// Zeiger meines Outputchannels - da modulo ist es egal ob er bei 0 anfängt
-			last = (last+1) % outputSize;
+		/*********************************************
+		 *  InputChannel
+		 ********************************************/
+		
+		/* 
+		 * i ist der Zähler unsere Kanäle - Bei 5 Kanälen rufen wir inputChannels.elementAt(aktuellePositionEingang).readObject() 5 mal auf 
+		 * 
+		 * damit unser Paket nicht überschrieben wird konntrolieren wir, ob noch nichts in unserem paket steht 
+		 *  
+		 * */
+		for(int i = 0; i < inputSize && paket == null;i++){
 			
-			try{
-				outputChannels.elementAt(last).writeObject(obj); 
-				obj = null;
+			try {
+				
+				paket = inputChannels.elementAt(aktuellePositionEingang).readObject();
+				
+			} catch (ChannelEmptyException e1) {
+				System.out.println("Nix da zum Lesen");
+				//e1.printStackTrace();
+			} catch (ChannelDisabledException e1) {
+				System.out.println("Input Kanal nicht aktiv");
+				//e1.printStackTrace();
 			}
-			catch(ChannelFullException exc) { return; } 
-			catch(ChannelDisabledException exc2) { return; }
+			
+			aktuellePositionEingang = (aktuellePositionEingang+1) % inputSize;
 		}
 		
-		count++;
-		System.out.println(" ---------------- " + count);
+		/*********************************************
+		 *  OutputChannel
+		 ********************************************/
+		
+		/* 
+		 * i ist der Zähler unsere Kanäle - Bei 5 Kanälen rufen wir inputChannels.elementAt(aktuellePositionEingang).readObject() 5 mal auf 
+		 * damit unser Paket nicht überschrieben wird konntrolieren wir, ob noch nichts in unserem paket steht
+		 * 
+		 * */
+
+		for(int i = 0; i < outputSize && paket != null;i++){
+			
+			try {
+				
+				outputChannels.elementAt(aktuellePositionAusgang).writeObject(paket);
+				paket = null;
+				// bei jedem Erfolgreich übergebenen Paket setzen wir unseren Counter eins weiter
+				count++;
+
+			} catch (ChannelDisabledException e1) {
+				System.out.println("Output Kanal nicht aktiv");
+				//e1.printStackTrace();
+			} catch (ChannelFullException e1){
+				System.out.println("Kanal ist voll");
+				//e1.printStackTrace();
+			}
+			// bei jedem Dritten versandtem Paket setzen wir unseren aktuellePositionAusgang eins weiter 
+			//- somit erreichen wir, dass jeder Ausgang immer 3 Pakete versendet bevor er zum nächsten wechselt.
+			if(count % 3 == 0){
+				aktuellePositionAusgang = (aktuellePositionAusgang+1) % outputSize;
+			}
+		}
+		
+		
 	}
 
 }

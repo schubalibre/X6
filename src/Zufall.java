@@ -7,42 +7,73 @@ import nodenet.OutputChannelVector;
 
 
 public class Zufall implements NodeBehavior {
-
-	private Object obj = null;
-	// die Zeiger der Input Channel's und der Output Channel's
-	private	int next = 0, last = 0;
-	
+	private Object paket = null;
+	private int aktuellePositionEingang = 0, aktuellePositionAusgang = 0;
 	@Override
 	public void transmitPacket(InputChannelVector inputChannels, OutputChannelVector outputChannels) {
-		
-		// die Channelanzahl (Bei jedem Durchlauf aktualisiert )
-		int inputSize = inputChannels.size();
+
+		int inputSize = inputChannels.size(); // gibt uns die Anzahl der Channels insgesamt wieder
 		int outputSize = outputChannels.size();
-
-		// Wenn keine Channel da sing
-		if(inputSize == 0 || outputSize == 0)return;
-
-		// Zeiger meines Inputchannels per Zufall berechnet
-		next = (int) (Math.random() * inputSize);
 		
-		if(obj == null){
-			try{
-				this.obj =  inputChannels.elementAt(next).readObject(); 
+		if(inputSize == 0 || outputSize == 0) return;// kontrolliert wieviele Kanäle im inputChannel sind 
+		
+		/*********************************************
+		 *  InputChannel
+		 ********************************************/
+		
+		/* 
+		 * i ist der Zähler unsere Kanäle - Bei 5 Kanälen rufen wir inputChannels.elementAt(aktuellePositionEingang).readObject() 5 mal auf 
+		 * 
+		 * damit unser Paket nicht überschrieben wird konntrolieren wir, ob noch nichts in unserem paket steht 
+		 *  
+		 * */
+		for(int i = 0; i < inputSize && paket == null;i++){
+			
+			try {
+				
+				paket = inputChannels.elementAt(aktuellePositionEingang).readObject();
+				
+			} catch (ChannelEmptyException e1) {
+				System.out.println("Nix da zum Lesen");
+				//e1.printStackTrace();
+			} catch (ChannelDisabledException e1) {
+				System.out.println("Input Kanal nicht aktiv");
+				//e1.printStackTrace();
 			}
-			catch(ChannelEmptyException exc) { return; } 
-			catch(ChannelDisabledException exc2) { return; }
+			aktuellePositionEingang = (int) (Math.random() * inputSize);
 		}
-
-		// Zeiger meines Outputchannels per Zufall berechnet
-		last = (int) (Math.random() * outputSize);
 		
-		try{
-			outputChannels.elementAt(last).writeObject(obj); 
-			obj = null;
-		}
-		catch(ChannelFullException exc) { return; } 
-		catch(ChannelDisabledException exc2) { return; }
+		
+		/*********************************************
+		 *  OutputChannel
+		 ********************************************/
+		
+		/* 
+		 * i ist der Zähler unsere Kanäle - Bei 5 Kanälen rufen wir inputChannels.elementAt(aktuellePositionEingang).readObject() 5 mal auf 
+		 * damit unser Paket nicht überschrieben wird konntrolieren wir, ob noch nichts in unserem paket steht
+		 * 
+		 * */
 
+		for(int i = 0; i < outputSize && paket != null;i++){
+			
+			try {
+				
+				outputChannels.elementAt(aktuellePositionAusgang).writeObject(paket);
+				paket = null;
+
+			} catch (ChannelDisabledException e1) {
+				System.out.println("Output Kanal nicht aktiv");
+				//e1.printStackTrace();
+			} catch (ChannelFullException e1){
+				System.out.println("Kanal ist voll");
+				//e1.printStackTrace();
+			}
+			
+			aktuellePositionAusgang = (int) (Math.random() * outputSize);
+		}
+
+		
 	}
+
 
 }
